@@ -2,7 +2,7 @@ const { response } = require('express');
 const dbMysql = require('../db-mysql');
 
 exports.get = (req, res, next) => {
-    dbMysql.QuerySelect('slv_usuarios', ['nome'], (err, rows) => {
+    dbMysql.QuerySelect('slv_usuarios', ['id_usuario', 'nome', 'email', 'ativo'], null, (err, rows) => {
         if (err) return res.status(500).send({
             error: err
         })
@@ -13,49 +13,77 @@ exports.get = (req, res, next) => {
     })
 }
 
-exports.getId = (req, res, next) => {
-    dbMysql.Query('select * from slv_usuarios where id = ' + req.params.id, (erroMsg, result, erro) => {
-        if (erro) return res.status(400).send({
-            error: erroMsg
-        })
+exports.getId = async (req, res, next) => {
 
-        if (result.length == 0) {
-            result = {
-                Message: 'Usuário: ' + req.params.id + ' não encontrado'
-            }
-        }
-
-        res.status(200).send({
-            data: result
-        })
-    })
+    try {
+        const result = await dbMysql.Query('select * from slv_usuarios where id_usuario = ' + req.params.id);
+        return res.status(200).send({
+            Response: result,
+            Message: '',
+            Sucess: true
+        });
+    } catch (error) {
+        res.status(400).send({
+            Response: [],
+            Message: error,
+            Sucess: false
+        });
+    };
 }
 
-exports.post = (req, res, next) => {
+exports.post = async (req, res, next) => {
 
-    if (!req.body) {
-        return res.status(400).send({
-            Message: 'Não foi possível realizar nenhuma ação'
-        })
-    }
+    const users = req.body;
     let cont = 0;
-    let msgError = '';
-    for (var usuario in req.body) {
-        dbMysql.Query("INSERT INTO SLV_USUARIOS(nome,senha,email) VALUES('" + usuario.nome + "','" + usuario.senha + "','" + usuario.email + "')", (msgErro, result, erro) => {
-            res.status(400).send({
-                data: [],
-                Message: 'Erro ao inserir usuários, ' + msgErro
-            });
-        })
-    }
+    let msgError = [];
+    for (usuario of users) {
+        try {
+            const result = await dbMysql.Query("INSERT INTO SLV_USUARIOS(nome,senha,email,dthr,ativo) VALUES('" + usuario.nome + "','" + usuario.senha + "','" + usuario.email + "', sysdate(), 1)");
+            cont++;
+        } catch (error) {
+            msgError.push(error);
+        }
+    };
+
     if (cont === 0) {
-        return res.status(400).send({
-            data: [],
-            Message: 'Erro ao inserir usuários, ' + msgError
+        res.status(400).send({
+            response: [],
+            Message: msgError,
+            Sucess: false
+        })
+    } else {
+        res.status(200).send({
+            Sesponse: [],
+            Message: cont + ' usuários inseridos com sucesso!',
+            Sucess: true
+        })
+    };
+}
+
+
+exports.delete = async (req, res, next) => {
+
+    try {
+        const result = await dbMysql.Query('delete from slv_usuarios where id_usuario = ' + req.params.id);
+        if(result.affectedRows > 0){
+            res.status(200).send({
+                Response: [],
+                Message: result.affectedRows + ' Usuário deletado com sucesso !',
+                Sucess: true
+            });
+        }
+        else{
+            res.status(200).send({
+                Response: [],
+                Message: 'usuário não encontrado no sistema',
+                Sucess: false
+            });
+        }
+    } catch (error) {
+        res.status(400).send({
+            Response: [],
+            Message: error,
+            Sucess: false
         });
-    }
-    res.status(200).send({
-        data: [],
-        Message: cont + ' usuários inseridos com sucesso!'
-    });
+    };
 }
