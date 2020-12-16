@@ -58,6 +58,8 @@ exports.post = async (req, res, next) => {
                     expiresIn: "1h"
                 });
 
+                const update = await dbMysql.Query(`UPDATE SLV_USUARIOS SET token = '${token}' WHERE id_usuario = ${result[0].id_usuario}`);
+
             return res.status(200).send({
                 Response: [{
                     Token: token,
