@@ -45,7 +45,7 @@ exports.Query = (query) =>{
                         reject(error);
                     } 
                     else{
-                        resolve([rows,rows.affectedRows]);
+                        resolve(rows);
                     }
                 })
             }
