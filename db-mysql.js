@@ -1,5 +1,5 @@
 var mysql = require('mysql');
-const erros = require('./routes/erros');
+var log = require('./Utils/logs');
 
 var pool  = mysql.createPool({
   connectionLimit : 10,
@@ -42,7 +42,8 @@ exports.Query = (query) =>{
                 conn.query(query,(error,rows)=>{
                     conn.release();
                     if(error){
-                        reject(error);
+                        log.gravaLog(error);
+                        reject({error_code: error.code, sql_message: error.sqlMessage});
                     } 
                     else{
                         resolve(rows);

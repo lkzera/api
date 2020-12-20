@@ -45,20 +45,34 @@ exports.post = async (req, res, next) => {
     }
     try {
 
-        const result = await dbMysql.Query(`SELECT * FROM slv_usuarios WHERE email = '${infoLogin.email}' and senha = '${infoLogin.senha}'`);
-        
+        const result = await dbMysql.Query(`SELECT * FROM slv_usuarios WHERE email = '${infoLogin.email}' and senha = '${infoLogin.senha}'`);   
+        let token;
+        let resultJwt = { exp: 0};
+
         if (result[0].nome.length > 0) {
 
-            let token = jwt.sign({
-                id_usuario: result[0].id_usuario,
-                email: result[0].email
-            },
-                process.env.JWT,
-                {
-                    expiresIn: "1h"
-                });
+            jwt.verify(result[0].token, process.env.JWT, (err, decoded)=>{
+                if(err){
+                    resultJwt.exp = 999999
+                }
+            });
 
+            //const resultJwt = (result[0].token === null ? {exp: 99999} : j));
+            
+            if (resultJwt.exp && Date.now() >= resultJwt.exp * 1000) {
+
+                token = jwt.sign({
+                    id_usuario: result[0].id_usuario,
+                    email: result[0].email
+                },
+                    process.env.JWT,
+                    {
+                        expiresIn: "1h"
+                    })
                 const update = await dbMysql.Query(`UPDATE SLV_USUARIOS SET token = '${token}' WHERE id_usuario = ${result[0].id_usuario}`);
+            }else{
+               token = result[0].token; 
+            }
 
             return res.status(200).send({
                 Response: [{

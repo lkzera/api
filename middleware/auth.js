@@ -9,7 +9,7 @@ module.exports = (req,res,next) =>{
     } catch (error) {
         return res.status(401).send({
             Response: [],
-            Message: 'Falha na autenticação',
+            Message: error,
             Sucess: false
         });
     }
