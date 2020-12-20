@@ -1,4 +1,3 @@
-const { response } = require('express');
 const dbMysql = require('../db-mysql');
 const jwt = require('jsonwebtoken');
 

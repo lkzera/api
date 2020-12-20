@@ -36,6 +36,7 @@ exports.Query = (query) =>{
     return new Promise((resolve,reject)=>{
         pool.getConnection((err,conn)=>{
             if(err){
+                log.gravaLog(err);
                 reject(err)
             }
             else{
@@ -46,6 +47,7 @@ exports.Query = (query) =>{
                         reject({error_code: error.code, sql_message: error.sqlMessage});
                     } 
                     else{
+                        log.gravaLog({Query: query, AffectRows: rows.AffectRows})
                         resolve(rows);
                     }
                 })
