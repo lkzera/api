@@ -106,3 +106,40 @@ exports.put = async (req, res, next) => {
     }
 
 }
+
+
+exports.delete = async(req,res,next) => {
+
+    if (!req.params.codigo){
+        return res.status(400).send({
+            Respons: [],
+            Message: 'É necessário um código para deletar o almox',
+            Success: false
+        });
+    }
+
+    try {
+        const retorno = dbMysql.Query(`delete from slv_almoxarifados where cod_almox = '${req.params.codigo}'`);
+
+        if(retorno.affectedRows > 0){
+            return res.status(200).send({
+                Response:[],
+                Message: 'Almoxarifado: ' + req.params.codigo + ' removido com sucesso!',
+                Success: true
+            })
+        }
+
+        res.status(400).send({
+            Response: [],
+            Message: 'Erro ao deletar o almoxarifado',
+            Success: false
+        });
+    } catch (error) {
+        res.status(400).send({
+            Response: [],
+            Message: error,
+            Success: false
+        });
+    }
+
+}

@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 //Get all products
 exports.get = async (req, res, next) => {
     try {
-        const result = await dbMysql.Query('select * from slv_produtos order by descricao asc');
+        const result = await dbMysql.Query('select codigo,descricao from slv_produtos order by descricao asc');
         return res.status(200).send({
             Response: result,
             Message: '',
@@ -43,7 +43,7 @@ exports.putId = async (req, res, next) => {
 
     if (!req.params.codigo) {
         return res.status(400).send({
-            Responde: [],
+            Response: [],
             Message: 'É necessário informar um código de produto!',
             Success: false
         });
